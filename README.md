@@ -127,8 +127,7 @@ directly comparable.
 
 ## Citation
 
-If you use this code in a paper please cite the accompanying preprint
-(`paper/RESEARCH_PAPER.md`) and the BraTS-PEDs 2023 challenge paper.
+If you use this code in a paper please cite the accompanying preprint.
 
 ## Acknowledgments
 
