@@ -1,0 +1,75 @@
+# NeuroSeg — SegResNet backbone with modality embedding (primary baseline).
+experiment:
+  name: segresnet_modality
+  seed: 42
+  deterministic: false
+  out_dir: outputs
+
+dataset:
+  root: BraTS-PEDs-v1/Training
+  # BraTS-PEDs 2024 default label mapping. Verify against your data card.
+  label_map:
+    et: [1]
+    tc: [1, 2, 3]
+    wt: [1, 2, 3, 4]
+  n_folds: 5
+  fold: 0                # which fold to train (0..n_folds-1)
+  test_frac: 0.10        # permanent held-out test set (carved off BEFORE KFold)
+  test_seed: 12345
+
+data:
+  roi_size: [128, 128, 128]
+  pixdim: [1.0, 1.0, 1.0]
+  batch_size: 1
+  val_batch_size: 1
+  num_workers: 2
+  p_modality_dropout: 0.30
+
+model:
+  name: segresnet
+  in_channels: 4
+  out_channels: 3
+  num_modalities: 4
+  emb_dim: 128
+  use_embedding: true
+  blocks_down: [1, 2, 2, 4]
+  blocks_up: [1, 1, 1]
+  init_filters: 16
+  dropout_prob: 0.2
+
+loss:
+  name: dicece
+  smooth_nr: 0.0
+  smooth_dr: 1.0e-5
+  squared_pred: false
+  lambda_dice: 1.0
+  lambda_ce: 1.0
+
+train:
+  max_epochs: 200
+  val_every: 1
+  early_stop_patience: 30
+  grad_clip: 1.0
+  amp: true
+  base_lr: 1.0e-4
+  weight_decay: 1.0e-5
+  warmup_epochs: 5
+  min_lr: 1.0e-6
+  sw_batch_size: 4
+  overlap: 0.5
+
+inference:
+  roi_size: [128, 128, 128]
+  sw_batch_size: 4
+  overlap: 0.5
+  use_tta: true
+  flip_axes: [2, 3, 4]
+
+postprocess:
+  threshold: 0.5
+  min_component_voxels:
+    TC: 100
+    WT: 100
+    ET: 50
+  et_min_volume_voxels: 200
+  enable_et_rule: true

@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Data and Outputs
+BraTS-PEDs-v1/
+Brain-Tumor-Test-Images/
+checkpoints/
+outputs/
+
+# AI-Generated Paper & Notes
+paper/
+RESEARCH_PAPER.md
+RESEARCH_PAPER_DRAFT.md
+docs/EXPERIMENT_SCHEDULE.md
+legacy/

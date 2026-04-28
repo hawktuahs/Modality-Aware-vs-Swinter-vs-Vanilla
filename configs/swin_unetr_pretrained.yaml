@@ -1,0 +1,69 @@
+# NeuroSeg — SwinUNETR with SSL pretrained encoder (the "base" upgrade).
+# Requires MONAI's self-supervised pretrained weights. Obtain from:
+#   https://github.com/Project-MONAI/research-contributions/tree/main/SwinUNETR
+# Place at checkpoints/pretrained/model_swinvit.pt
+experiment:
+  name: swin_unetr_pretrained
+  seed: 42
+  out_dir: outputs
+
+dataset:
+  root: BraTS-PEDs-v1/Training
+  label_map:
+    et: [1]
+    tc: [1, 2, 3]
+    wt: [1, 2, 3, 4]
+  n_folds: 5
+  fold: 0
+  test_frac: 0.10
+  test_seed: 12345
+
+data:
+  roi_size: [96, 96, 96]          # smaller ROI fits SwinUNETR on 4060/8GB
+  pixdim: [1.0, 1.0, 1.0]
+  batch_size: 1
+  val_batch_size: 1
+  num_workers: 2
+  p_modality_dropout: 0.30
+
+model:
+  name: swinunetr
+  in_channels: 4
+  out_channels: 3
+  num_modalities: 4
+  emb_dim: 128
+  use_embedding: true
+  img_size: [96, 96, 96]
+  feature_size: 48
+  use_checkpoint: true
+  pretrained_ssl_path: checkpoints/pretrained/model_swinvit.pt
+  # Downloaded from: https://github.com/Project-MONAI/MONAI-extra-test-data/releases/download/0.8.1/model_swinvit.pt
+
+loss:
+  name: dicece
+
+train:
+  max_epochs: 150
+  val_every: 1
+  early_stop_patience: 25
+  grad_clip: 1.0
+  amp: true
+  base_lr: 2.0e-4
+  weight_decay: 1.0e-5
+  warmup_epochs: 10
+  min_lr: 1.0e-6
+  sw_batch_size: 2          # SwinUNETR is heavier; lower sw_batch_size
+  overlap: 0.5
+
+inference:
+  roi_size: [96, 96, 96]
+  sw_batch_size: 2
+  overlap: 0.6
+  use_tta: true
+  flip_axes: [2, 3, 4]
+
+postprocess:
+  threshold: 0.5
+  min_component_voxels: {TC: 100, WT: 100, ET: 50}
+  et_min_volume_voxels: 200
+  enable_et_rule: true
