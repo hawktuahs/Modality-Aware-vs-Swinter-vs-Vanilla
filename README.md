@@ -19,24 +19,6 @@ dataset with support for:
 - Flask web app for clinical-style drag-and-drop inference (with TTA
   and overlay figures).
 
-## Why this repo is a rewrite of the original notebook-merged code
-
-The previous iteration (see `legacy/`) had four issues that mattered
-for paper-grade results:
-
-1. The 0.5395 mean-Dice figure was reported on training-set subjects,
-   not a held-out set.
-2. `ConvertToMultiChannelBasedOnBratsClassesd` (adult BraTS labels
-   {1,2,4}) silently dropped label-3 voxels that BraTS-PEDs uses for
-   a real tumour sub-region, breaking the TC/WT/ET definitions.
-3. `predict.py` and `train.py` disagreed on the ET label — this alone
-   depresses ET Dice substantially.
-4. The training loop used `torch.ones(...)` as the modality mask at
-   validation, but a stochastic dropout mask at training, so the
-   validation metric was systematically off-distribution.
-
-The new pipeline fixes all four.
-
 ## Repository layout
 
 ```
